@@ -1,0 +1,62 @@
+pub fn look_up_table(literal: String) -> Token {
+    use Token::*;
+    match literal.as_str() {
+        "class" => Class,
+        "method" => Method,
+        "function" => Function,
+        "constructor" => Constructor,
+        "int" => Int,
+        "boolean" => Boolean,
+        "char" => Char,
+        "void" => Void,
+        "var" => Var,
+        "static" => Static,
+        "field" => Field,
+        "let" => Let,
+        "do" => Do,
+        "if" => If,
+        "else" => Else,
+        "while" => While,
+        "return" => Return,
+        "true" => True,
+        "false" => False,
+        "this" => This,
+        "null" => Null,
+        _ => Ident(literal),
+    }
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Token {
+    Class,
+    Method,
+    Function,
+    Constructor,
+    Var,
+    Static,
+    Field,
+    Let,
+    Do,
+    If,
+    Else,
+    While,
+    Return,
+    True,
+    False,
+    Null,
+    This,
+    Int,
+    Boolean,
+    Char,
+    Void,
+
+    GreaterThan,
+    LessThan,
+
+    Ident(String),
+    IntConst(String),
+    StringConst(String),
+    Symbol(String),
+
+    Comment(String),
+    Eof,
+}
