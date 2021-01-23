@@ -1,6 +1,5 @@
-use crate::errors::LexError;
 use crate::token::{look_up_table, Token};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
 #[derive(Debug, Clone)]
 pub struct Lexer<'a> {
@@ -12,19 +11,21 @@ pub struct Lexer<'a> {
 
 impl<'a> Lexer<'a> {
     pub fn new(input: &'a str) -> Self {
-        Lexer {
+        let mut lexer = Lexer {
             input,
             ch: 0,
             pos: 0,
             consume_pos: 0,
-        }
+        };
+
+        lexer.consume_char();
+        lexer.skip_white();
+        lexer
     }
 
     pub fn lex(&mut self) -> Result<Vec<Token>> {
         use Token::*;
         let mut tokens = vec![];
-        self.consume_char();
-        self.skip_white();
         while self.ch != 0 {
             let token = self.next_token()?;
             tokens.push(token);
@@ -34,7 +35,6 @@ impl<'a> Lexer<'a> {
     }
 
     fn next_token(&mut self) -> Result<Token> {
-        use LexError::*;
         use Token::*;
         let token = match self.ch {
             b'{' | b'}' | b'(' | b')' | b'[' | b']' | b'.' | b',' | b';' | b'+' | b'-' | b'*'
@@ -75,7 +75,7 @@ impl<'a> Lexer<'a> {
                 Ok(StringConst(string))
             }
             b'/' => Ok(self.consume_comment()),
-            _ => Err(InvalidChar(self.ch as char).into()),
+            _ => Err(anyhow!("invalid char {}", self.ch)),
         };
 
         self.skip_white();

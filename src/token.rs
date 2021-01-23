@@ -49,9 +49,6 @@ pub enum Token {
     Char,
     Void,
 
-    GreaterThan,
-    LessThan,
-
     Ident(String),
     IntConst(String),
     StringConst(String),

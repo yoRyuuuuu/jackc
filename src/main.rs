@@ -1,8 +1,9 @@
 #[macro_use]
 mod token;
-mod errors;
 mod lexer;
 mod tests;
+mod parser;
+mod ast;
 
 use anyhow::Result;
 
@@ -18,7 +19,6 @@ fn main() -> Result<()> {
     let mut f = File::open(input_file_name).unwrap();
     let mut input = String::new();
     let _ = f.read_to_string(&mut input).unwrap();
-    // let input = r#" constructor var static a 1000 "#;
     let mut lexer = Lexer::new(&input);
     match lexer.lex() {
         Ok(tokens) => println!("{:?}", tokens),
