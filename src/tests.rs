@@ -87,6 +87,62 @@ fn test_parse_expr() -> Result<()> {
         },
         ast
     );
+    let input = r#"i = i + 1"#;
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+    let ast = parser.parse_expr()?;
+    assert_eq!(
+        Expression::Binary {
+            left: Term::Var("i".to_string()),
+            op: Operator::Assign,
+            right: Box::new(Expression::Binary {
+                left: Term::Var("i".to_string()),
+                op: Operator::Plus,
+                right: Box::new(Expression::Unary(Term::IntConst("1".to_string()))),
+            })
+        },
+        ast
+    );
+
+    let input = r#"sum = sum + a[i + 1] * a[i + 2]"#;
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+    let ast = parser.parse_expr()?;
+
+    assert_eq!(
+        Expression::Binary {
+            left: Term::Var("sum".to_string()),
+            op: Operator::Assign,
+            right: Box::new(Expression::Binary {
+                left: Term::Var("sum".to_string()),
+                op: Operator::Plus,
+                right: Box::new(Expression::Binary {
+                    left: Term::Array {
+                        name: "a".to_string(),
+                        index: Box::new(Expression::Binary {
+                            left: Term::Var("i".to_string()),
+                            op: Operator::Plus,
+                            right: Box::new(Expression::Unary(Term::IntConst("1".to_string())))
+                        })
+                    },
+                    op: Operator::Aster,
+                    right: Box::new(Expression::Unary(Term::Array {
+                        name: "a".to_string(),
+                        index: Box::new(Expression::Binary {
+                            left: Term::Var("i".to_string()),
+                            op: Operator::Plus,
+                            right: Box::new(Expression::Unary(Term::IntConst("2".to_string())))
+                        })
+                    }))
+                })
+            })
+        },
+        ast
+    );
+    
+    Ok(())
+}
+
 #[test]
 fn parse_term() -> Result<()> {
     let input = r#"a[i]"#;
