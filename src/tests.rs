@@ -87,5 +87,30 @@ fn test_parse_expr() -> Result<()> {
         },
         ast
     );
+#[test]
+fn parse_term() -> Result<()> {
+    let input = r#"a[i]"#;
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+    let ast = parser.parse_term()?;
+    assert_eq!(
+        Term::Array {
+            name: "a".to_string(),
+            index: Box::new(Expression::Unary(Term::Var("i".to_string())))
+        },
+        ast
+    );
+    let input = r#"(a[i])"#;
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+    let ast = parser.parse_term()?;
+    assert_eq!(
+        Term::Expr(Box::new(Expression::Unary(Term::Array {
+            name: "a".to_string(),
+            index: Box::new(Expression::Unary(Term::Var("i".to_string())))
+        }))),
+        ast
+    );
+
     Ok(())
 }
