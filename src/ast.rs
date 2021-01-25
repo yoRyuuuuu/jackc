@@ -131,7 +131,7 @@ pub enum UnaryOp {
 pub enum Operator {
     Plus,
     Minus,
-    Asterisk,
+    Aster,
     Slash,
     And,
     Or,
