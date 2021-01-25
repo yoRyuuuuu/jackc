@@ -24,6 +24,29 @@ impl<'a> Parser<'a> {
         self.cur_token = self.lexer.next_token();
     }
 
+    pub fn parse_statements(&mut self) -> Result<Statement> {
+        let stmt = match self.cur_token {
+            Token::Let => {
+                unimplemented!()
+            }
+            Token::If => {
+                unimplemented!()
+            }
+            Token::While => {
+                unimplemented!()
+            }
+            Token::Do => {
+                unimplemented!()
+            }
+            Token::Return => {
+                unimplemented!()
+            }
+            _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
+        };
+
+        Ok(stmt)
+    }
+
     pub fn parse_expr(&mut self) -> Result<Expression> {
         let left = self.parse_term()?;
         match self.cur_token {
