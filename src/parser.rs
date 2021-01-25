@@ -39,13 +39,9 @@ impl<'a> Parser<'a> {
                     "&lt;" => Operator::LessThan,
                     "&gt;" => Operator::GreaterThan,
                     "=" => Operator::Assign,
-                    _ => {
-                        return Err(anyhow!(
-                            "unexpected symbol {:?} in parse_expr",
-                            self.cur_token
-                        ))
-                    }
+                    _ => return Ok(Expression::Unary(left)),
                 };
+
                 self.next_token();
                 let right = Box::new(self.parse_expr()?);
                 Ok(Expression::Binary { left, op, right })
@@ -55,16 +51,42 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_term(&mut self) -> Result<Term> {
-        let term = match self.cur_token {
+        let term = match self.cur_token.clone() {
             Token::IntConst(ref literal) => Term::IntConst(literal.to_owned()),
             Token::StringConst(ref literal) => Term::StringConst(literal.to_owned()),
             Token::True => Term::True,
             Token::False => Term::False,
             Token::Null => Term::Null,
             Token::This => Term::This,
-            Token::Ident(ref string) => {
-                unimplemented!();
-            },
+            Token::Ident(name) => {
+                self.next_token();
+                match self.cur_token {
+                    Token::Symbol(ref literal) => {
+                        let literal = literal.as_str();
+                        match literal {
+                            "[" => {
+                                self.next_token();
+                                let expr = self.parse_expr()?;
+                                self.symbol_is("]")?;
+                                Term::Array {
+                                    name: name.to_owned(),
+                                    index: Box::new(expr),
+                                }
+                            }
+                            _ => return Ok(Term::Var(name)),
+                        }
+                    }
+                    _ => return Ok(Term::Var(name)),
+                }
+            }
+            Token::Symbol(_) => {
+                self.symbol_is("(")?;
+                self.next_token();
+                let expr = self.parse_expr()?;
+                self.symbol_is(")")?;
+                self.next_token();
+                return Ok(Term::Expr(Box::new(expr)));
+            }
             _ => {
                 return Err(anyhow!(
                     "unexpected token {:?} in parse_term",
@@ -74,5 +96,17 @@ impl<'a> Parser<'a> {
         };
         self.next_token();
         Ok(term)
+    }
+
+    pub fn symbol_is(&self, literal: &str) -> Result<()> {
+        let token = Token::Symbol(literal.to_owned());
+        if self.cur_token != token {
+            return Err(anyhow!(
+                "unexpected symbol {:?}. expected {:?}",
+                self.cur_token,
+                token
+            ));
+        }
+        Ok(())
     }
 }
