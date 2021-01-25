@@ -8,6 +8,7 @@ mod ast;
 use anyhow::Result;
 
 use lexer::Lexer;
+use parser::Parser;
 use std::env::args;
 use std::fs::File;
 use std::io::Read;
@@ -20,9 +21,6 @@ fn main() -> Result<()> {
     let mut input = String::new();
     let _ = f.read_to_string(&mut input).unwrap();
     let mut lexer = Lexer::new(&input);
-    match lexer.lex() {
-        Ok(tokens) => println!("{:?}", tokens),
-        Err(e) => eprintln!("{}", e),
-    }
+    let mut parser = Parser::new(lexer);
     Ok(())
 }
