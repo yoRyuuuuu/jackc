@@ -24,25 +24,28 @@ impl<'a> Parser<'a> {
         self.cur_token = self.lexer.next_token();
     }
 
-    pub fn parse_statements(&mut self) -> Result<Statement> {
-        let stmt = match self.cur_token {
-            Token::Let => self.parse_let_stmt()?,
-            Token::If => {
-                unimplemented!()
-            }
-            Token::While => {
-                unimplemented!()
-            }
-            Token::Do => {
-                unimplemented!()
-            }
-            Token::Return => {
-                unimplemented!()
-            }
-            _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
-        };
+    pub fn parse_statements(&mut self) -> Result<Vec<Statement>> {
+        let mut stmts = vec![];
 
-        Ok(stmt)
+        loop {
+            let stmt = match self.cur_token {
+                Token::Let => self.parse_let_stmt()?,
+                Token::If => {
+                    unimplemented!()
+                }
+                Token::While => {
+                    unimplemented!()
+                }
+                Token::Do => {
+                    unimplemented!()
+                }
+                Token::Return => {
+                    unimplemented!()
+                }
+                _ => return Ok(stmts),
+            };
+            stmts.push(stmt);
+        }
     }
 
     pub fn parse_let_stmt(&mut self) -> Result<Statement> {
@@ -82,7 +85,42 @@ impl<'a> Parser<'a> {
 
         self.symbol_is("(")?;
         self.next_token();
-        let condition
+
+        let condition = self.parse_expr()?;
+
+        self.symbol_is(")")?;
+        self.next_token();
+
+        self.symbol_is("{")?;
+        self.next_token();
+
+        let true_stmts = Box::new(self.parse_statements()?);
+
+        self.symbol_is("}")?;
+        self.next_token();
+
+        let false_stmts = match self.cur_token {
+            Token::Else => {
+                self.symbol_is("{")?;
+                self.next_token();
+
+                let false_stmts = self.parse_statements()?;
+
+                self.symbol_is("}")?;
+                self.next_token();
+
+                Some(Box::new(false_stmts))
+            }
+            _ => None,
+        };
+
+        let stmt = Statement::IfStatement {
+            condition,
+            true_stmts,
+            false_stmts,
+        };
+
+        Ok(stmt)
     }
 
     pub fn parse_expr(&mut self) -> Result<Expression> {
@@ -349,7 +387,7 @@ mod tests {
 
     #[test]
     fn test_parse_let_stmt() -> Result<()> {
-        let input = r#"let a = 10"#;
+        let input = r#"let a = 10;"#;
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let ast = parser.parse_let_stmt()?;
@@ -362,7 +400,7 @@ mod tests {
             ast
         );
 
-        let input = r#"let a[10] = 10"#;
+        let input = r#"let a[10] = 10;"#;
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let ast = parser.parse_let_stmt()?;
@@ -375,6 +413,31 @@ mod tests {
             ast
         );
 
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_statements() -> Result<()> {
+        let input = r#"let a[10] = 10;
+let a = 10;"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_statements()?;
+        let stmts = vec![
+            Statement::LetStatement {
+                name: "a".to_string(),
+                index: Some(Expression::Unary(Term::IntConst("10".to_string()))),
+                value: Expression::Unary(Term::IntConst("10".to_string())),
+            },
+            Statement::LetStatement {
+                name: "a".to_string(),
+                index: None,
+                value: Expression::Unary(Term::IntConst("10".to_string())),
+            },
+        ];
+
+        assert_eq!(stmts, ast);
         Ok(())
     }
 }
