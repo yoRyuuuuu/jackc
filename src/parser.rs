@@ -417,6 +417,48 @@ mod tests {
     }
 
     #[test]
+    fn test_if_stmt() -> Result<()> {
+        let input = r#"if (false) {
+    let s = "string constant";
+    }
+    else {
+        let i = i * j;
+    }"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_if_stmt()?;
+
+        let true_stmts = vec![
+            Statement::LetStatement {
+            name: "s".to_string(),
+            index: None,
+            value: Expression::Unary(Term::StringConst("string cosstant".to_string())),
+            }
+        ];
+
+        let false_stmts = vec![
+            Statement::LetStatement {
+                name: "i".to_string(),
+                index: None,
+                value: Expression::Binary {
+                    left: Term::Var("i".to_string()),
+                    op: Operator::Aster,
+                    right: Box::new(Expression::Unary(Term::Var("j".to_string())))
+                }
+            }
+        ];
+
+        let stmt = Statement::IfStatement {
+            condition: Expression::Unary(Term::True),
+            true_stmts: Box::new(true_stmts),
+            false_stmts: Some(Box::new(false_stmts)),
+        };
+
+        Ok(())
+    }
+
+    #[test]
     fn test_parse_statements() -> Result<()> {
         let input = r#"let a[10] = 10;
 let a = 10;"#;
