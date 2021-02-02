@@ -30,9 +30,7 @@ impl<'a> Parser<'a> {
         loop {
             let stmt = match self.cur_token {
                 Token::Let => self.parse_let_stmt()?,
-                Token::If => {
-                    unimplemented!()
-                }
+                Token::If => self.parse_if_stmt()?,
                 Token::While => {
                     unimplemented!()
                 }
@@ -81,7 +79,7 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_if_stmt(&mut self) -> Result<Statement> {
-        self.next_token(); // let
+        self.next_token(); // if
 
         self.symbol_is("(")?;
         self.next_token();
@@ -101,6 +99,8 @@ impl<'a> Parser<'a> {
 
         let false_stmts = match self.cur_token {
             Token::Else => {
+                self.next_token(); // else
+
                 self.symbol_is("{")?;
                 self.next_token();
 
@@ -201,7 +201,7 @@ impl<'a> Parser<'a> {
         let token = Token::Symbol(literal.to_owned());
         if self.cur_token != token {
             return Err(anyhow!(
-                "unexpected symbol {:?}. expected {:?}",
+                "unexpected token {:?}. expected {:?} in symbol_is",
                 self.cur_token,
                 token
             ));
