@@ -139,7 +139,7 @@ fn test_parse_expr() -> Result<()> {
         },
         ast
     );
-    
+
     Ok(())
 }
 
@@ -165,6 +165,37 @@ fn parse_term() -> Result<()> {
             name: "a".to_string(),
             index: Box::new(Expression::Unary(Term::Var("i".to_string())))
         }))),
+        ast
+    );
+
+    Ok(())
+}
+
+#[test]
+fn test_parse_let_stmt() -> Result<()> {
+    let input = r#"let a = 10"#;
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+    let ast = parser.parse_let_stmt()?;
+    assert_eq!(
+        Statement::LetStatement {
+            name: "a".to_string(),
+            index: None,
+            value: Expression::Unary(Term::IntConst("10".to_string())),
+        },
+        ast
+    );
+
+    let input = r#"let a[10] = 10"#;
+    let lexer = Lexer::new(input);
+    let mut parser = Parser::new(lexer);
+    let ast = parser.parse_let_stmt()?;
+    assert_eq!(
+        Statement::LetStatement {
+            name: "a".to_string(),
+            index: Some(Expression::Unary(Term::IntConst("10".to_string()))),
+            value: Expression::Unary(Term::IntConst("10".to_string())),
+        },
         ast
     );
 
