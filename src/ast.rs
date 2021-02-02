@@ -73,12 +73,12 @@ pub enum Statement {
     },
     IfStatement {
         condition: Expression,
-        true_stmt: Box<Statement>,
-        false_stmt: Option<Box<Statement>>,
+        true_stmts: Box<Vec<Statement>>,
+        false_stmts: Option<Box<Vec<Statement>>>,
     },
     WhileStatement {
         condition: Expression,
-        stmt: Box<Statement>,
+        stmts: Box<Vec<Statement>>,
     },
 }
 

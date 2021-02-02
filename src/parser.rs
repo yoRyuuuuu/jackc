@@ -74,6 +74,14 @@ impl<'a> Parser<'a> {
         Ok(stmt)
     }
 
+    pub fn parse_if_stmt(&mut self) -> Result<Statement> {
+        self.next_token(); // let
+
+        self.symbol_is("(")?;
+        self.next_token();
+        let condition
+    }
+
     pub fn parse_expr(&mut self) -> Result<Expression> {
         let left = self.parse_term()?;
         match self.cur_token {
