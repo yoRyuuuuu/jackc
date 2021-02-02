@@ -1,7 +1,6 @@
 #[macro_use]
 mod token;
 mod lexer;
-mod tests;
 mod parser;
 mod ast;
 
