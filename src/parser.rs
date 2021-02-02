@@ -26,9 +26,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_statements(&mut self) -> Result<Statement> {
         let stmt = match self.cur_token {
-            Token::Let => {
-                unimplemented!()
-            }
+            Token::Let => self.parse_let_stmt()?,
             Token::If => {
                 unimplemented!()
             }
@@ -43,6 +41,35 @@ impl<'a> Parser<'a> {
             }
             _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
         };
+
+        Ok(stmt)
+    }
+
+    pub fn parse_let_stmt(&mut self) -> Result<Statement> {
+        self.next_token();
+
+        let name = match self.cur_token {
+            Token::Ident(ref name) => name.to_owned(),
+            _ => return Err(anyhow!("unexpected token {:?}", self.cur_token,)),
+        };
+        self.next_token();
+
+        let index = match self.symbol_is("[") {
+            Ok(_) => {
+                self.next_token();
+                let expr = self.parse_expr()?;
+                self.symbol_is("]")?;
+                self.next_token();
+                Some(expr)
+            }
+            Err(_) => None,
+        };
+
+        self.symbol_is("=")?;
+        self.next_token();
+
+        let value = self.parse_expr()?;
+        let stmt = Statement::LetStatement { name, index, value };
 
         Ok(stmt)
     }
