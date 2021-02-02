@@ -71,6 +71,9 @@ impl<'a> Parser<'a> {
         let value = self.parse_expr()?;
         let stmt = Statement::LetStatement { name, index, value };
 
+        self.symbol_is(";")?;
+        self.next_token();
+
         Ok(stmt)
     }
 
