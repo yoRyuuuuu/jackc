@@ -35,9 +35,7 @@ impl<'a> Parser<'a> {
                 Token::Do => {
                     unimplemented!()
                 }
-                Token::Return => {
-                    unimplemented!()
-                }
+                Token::Return => self.parse_return_stmt()?,
                 _ => return Ok(stmts),
             };
             stmts.push(stmt);
@@ -145,6 +143,20 @@ impl<'a> Parser<'a> {
             false_stmts,
         };
 
+        Ok(stmt)
+    }
+
+    pub fn parse_return_stmt(&mut self) -> Result<Statement> {
+        self.next_token();
+
+        let expr = match self.symbol_is(";") {
+            Ok(_) => None,
+            Err(_) => Some(self.parse_expr()?),
+        };
+
+        self.next_token();
+
+        let stmt = Statement::ReturnStatement(expr);
         Ok(stmt)
     }
 
