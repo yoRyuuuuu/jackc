@@ -74,6 +74,7 @@ pub enum Statement {
         condition: Expression,
         stmts: Box<Vec<Statement>>,
     },
+    DoStatement(SubroutineCall),
     ReturnStatement(Option<Expression>)
 }
 
