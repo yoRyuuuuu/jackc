@@ -260,6 +260,20 @@ impl<'a> Parser<'a> {
         Ok(term)
     }
 
+    fn parse_expr_list(&mut self) -> Result<Vec<Expression>> {
+        let mut list = vec![];
+        let expr = self.parse_expr()?;
+        list.push(expr);
+
+        while self.symbol_is(",").is_ok() {
+            self.next_token();
+            let expr = self.parse_expr()?;
+            list.push(expr);
+        }
+
+        Ok(list)
+    }
+
     fn symbol_is(&self, literal: &str) -> Result<()> {
         let token = Token::Symbol(literal.to_owned());
         if self.cur_token != token {
