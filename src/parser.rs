@@ -714,6 +714,42 @@ let a = 10;"#;
             ast
         );
 
+        let input = r#"do Screen.drawRectangle(x, y, x, y);"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_do_stmt()?;
+
+        assert_eq!(
+            Statement::DoStatement(SubroutineCall::MethodCall {
+                name: "Screen".to_string(),
+                sub_name: "drawRectangle".to_string(),
+                expr_list: Some(vec![
+                    Expression::Unary(Term::Var("x".to_string())),
+                    Expression::Unary(Term::Var("y".to_string())),
+                    Expression::Unary(Term::Var("x".to_string())),
+                    Expression::Unary(Term::Var("y".to_string())),
+                ])
+            }),
+            ast
+        );
+
+        let input = r#"do hello("KEN");"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_do_stmt()?;
+
+        assert_eq!(
+            Statement::DoStatement(SubroutineCall::FuncCall {
+                sub_name: "hello".to_string(),
+                expr_list: Some(vec![
+                    Expression::Unary(Term::StringConst("KEN".to_string())),
+                ])
+            }),
+            ast
+        );
+
         Ok(())
     }
 }
