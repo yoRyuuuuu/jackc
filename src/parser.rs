@@ -32,14 +32,25 @@ impl<'a> Parser<'a> {
                 Token::Let => self.parse_let_stmt()?,
                 Token::If => self.parse_if_stmt()?,
                 Token::While => self.parse_while_stmt()?,
-                Token::Do => {
-                    unimplemented!()
-                }
+                Token::Do => self.parse_do_stmt()?,
                 Token::Return => self.parse_return_stmt()?,
                 _ => return Ok(stmts),
             };
             stmts.push(stmt);
         }
+    }
+
+    pub fn parse_do_stmt(&mut self) -> Result<Statement> {
+        self.next_token(); // do
+
+        let sub = self.parse_subroutine_call()?;
+
+        self.symbol_is(";")?;
+        self.next_token();
+
+        let stmt = Statement::DoStatement(sub);
+
+        Ok(stmt)
     }
 
     pub fn parse_while_stmt(&mut self) -> Result<Statement> {
