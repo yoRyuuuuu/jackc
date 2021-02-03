@@ -178,13 +178,39 @@ impl<'a> Parser<'a> {
                     _ => return Ok(Term::Var(name)),
                 }
             }
-            Token::Symbol(_) => {
-                self.symbol_is("(")?;
+            Token::Symbol(symbol) => {
+                let symbol = symbol.as_str();
                 self.next_token();
-                let expr = self.parse_expr()?;
-                self.symbol_is(")")?;
-                self.next_token();
-                return Ok(Term::Expr(Box::new(expr)));
+                match symbol {
+                    "(" => {
+                        let expr = self.parse_expr()?;
+                        self.symbol_is(")")?;
+                        self.next_token();
+                        return Ok(Term::Expr(Box::new(expr)));
+                    }
+                    "-" => {
+                        let op = UnaryOp::Minus;
+                        let term = self.parse_term()?;
+                        return Ok(Term::Unary {
+                            op,
+                            term: Box::new(term),
+                        });
+                    }
+                    "~" => {
+                        let op = UnaryOp::Not;
+                        let term = self.parse_term()?;
+                        return Ok(Term::Unary {
+                            op,
+                            term: Box::new(term),
+                        });
+                    }
+                    _ => {
+                        return Err(anyhow!(
+                            "unexpected symbol {:?} in parse_term",
+                            self.cur_token
+                        ))
+                    }
+                }
             }
             _ => {
                 return Err(anyhow!(
