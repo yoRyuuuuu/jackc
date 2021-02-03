@@ -548,4 +548,27 @@ let a = 10;"#;
         assert_eq!(stmts, ast);
         Ok(())
     }
+    #[test]
+    fn test_parse_return_stmt() -> Result<()> {
+        let input = r#"return;"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_return_stmt()?;
+
+        assert_eq!(Statement::ReturnStatement(None), ast);
+
+        let input = r#"return 1000;"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_return_stmt()?;
+
+        assert_eq!(
+            Statement::ReturnStatement(Some(Expression::Unary(Term::IntConst("1000".to_string())))),
+            ast
+        );
+
+        Ok(())
+    }
 }
