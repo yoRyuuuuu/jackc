@@ -31,9 +31,7 @@ impl<'a> Parser<'a> {
             let stmt = match self.cur_token {
                 Token::Let => self.parse_let_stmt()?,
                 Token::If => self.parse_if_stmt()?,
-                Token::While => {
-                    unimplemented!()
-                }
+                Token::While => self.parse_while_stmt()?,
                 Token::Do => {
                     unimplemented!()
                 }
@@ -44,6 +42,33 @@ impl<'a> Parser<'a> {
             };
             stmts.push(stmt);
         }
+    }
+
+    pub fn parse_while_stmt(&mut self) -> Result<Statement> {
+        self.next_token(); // while
+
+        self.symbol_is("(")?;
+        self.next_token();
+
+        let condition = self.parse_expr()?;
+
+        self.symbol_is(")")?;
+        self.next_token();
+
+        self.symbol_is("{")?;
+        self.next_token();
+
+        let stmts = self.parse_statements()?;
+
+        self.symbol_is("}")?;
+        self.next_token();
+
+        let stmt = Statement::WhileStatement {
+            condition,
+            stmts: Box::new(stmts),
+        };
+
+        Ok(stmt)
     }
 
     pub fn parse_let_stmt(&mut self) -> Result<Statement> {

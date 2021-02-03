@@ -80,6 +80,7 @@ pub enum Statement {
         condition: Expression,
         stmts: Box<Vec<Statement>>,
     },
+    ReturnStatement(Option<Expression>)
 }
 
 #[derive(Debug, Clone, PartialEq)]
