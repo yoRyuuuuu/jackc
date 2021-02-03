@@ -24,7 +24,7 @@ impl<'a> Parser<'a> {
         self.cur_token = self.lexer.next_token();
     }
 
-    pub fn parse_statements(&mut self) -> Result<Vec<Statement>> {
+    fn parse_statements(&mut self) -> Result<Vec<Statement>> {
         let mut stmts = vec![];
 
         loop {
@@ -69,7 +69,7 @@ impl<'a> Parser<'a> {
         Ok(stmt)
     }
 
-    pub fn parse_let_stmt(&mut self) -> Result<Statement> {
+    fn parse_let_stmt(&mut self) -> Result<Statement> {
         self.next_token();
 
         let name = match self.cur_token {
@@ -101,7 +101,7 @@ impl<'a> Parser<'a> {
         Ok(stmt)
     }
 
-    pub fn parse_if_stmt(&mut self) -> Result<Statement> {
+    fn parse_if_stmt(&mut self) -> Result<Statement> {
         self.next_token(); // if
 
         self.symbol_is("(")?;
@@ -146,7 +146,7 @@ impl<'a> Parser<'a> {
         Ok(stmt)
     }
 
-    pub fn parse_return_stmt(&mut self) -> Result<Statement> {
+    fn parse_return_stmt(&mut self) -> Result<Statement> {
         self.next_token();
 
         let expr = match self.symbol_is(";") {
@@ -160,7 +160,7 @@ impl<'a> Parser<'a> {
         Ok(stmt)
     }
 
-    pub fn parse_expr(&mut self) -> Result<Expression> {
+    fn parse_expr(&mut self) -> Result<Expression> {
         let left = self.parse_term()?;
         match self.cur_token {
             Token::Symbol(ref literal) => {
@@ -186,7 +186,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse_term(&mut self) -> Result<Term> {
+    fn parse_term(&mut self) -> Result<Term> {
         let term = match self.cur_token.clone() {
             Token::IntConst(ref literal) => Term::IntConst(literal.to_owned()),
             Token::StringConst(ref literal) => Term::StringConst(literal.to_owned()),
@@ -260,7 +260,7 @@ impl<'a> Parser<'a> {
         Ok(term)
     }
 
-    pub fn symbol_is(&self, literal: &str) -> Result<()> {
+    fn symbol_is(&self, literal: &str) -> Result<()> {
         let token = Token::Symbol(literal.to_owned());
         if self.cur_token != token {
             return Err(anyhow!(
