@@ -78,6 +78,18 @@ pub enum Statement {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub enum SubroutineCall {
+    FuncCall {
+        sub_name: String,
+        expr_list: Option<Vec<Expression>>,
+    },
+    MethodCall {
+        name: String,
+        sub_name: String,
+        expr_list: Option<Vec<Expression>>
+    }
+}
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
     Unary(Term),
     Binary {
