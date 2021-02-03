@@ -686,21 +686,20 @@ let a = 10;"#;
 
         Ok(())
     }
-
     #[test]
-    fn test_parse_subroutine_call() -> Result<()> {
-        let input = r#"game.run()"#;
+    fn test_parse_do_stmt() -> Result<()> {
+        let input = r#"do game.dispose();"#;
 
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
-        let ast = parser.parse_subroutine_call()?;
+        let ast = parser.parse_do_stmt()?;
 
         assert_eq!(
-            SubroutineCall::MethodCall {
+            Statement::DoStatement(SubroutineCall::MethodCall {
                 name: "game".to_string(),
-                sub_name: "run".to_string(),
+                sub_name: "dispose".to_string(),
                 expr_list: None,
-            },
+            }),
             ast
         );
 
