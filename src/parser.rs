@@ -656,4 +656,34 @@ let a = 10;"#;
 
         Ok(())
     }
+
+    #[test]
+    fn test_expr_list() -> Result<()> {
+        let input = r#"1"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_expr_list()?;
+
+        let list = vec![Expression::Unary(Term::IntConst("1".to_string()))];
+
+        assert_eq!(ast, list);
+
+        let input = r#"1, 2, a, b"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_expr_list()?;
+
+        let list = vec![
+            Expression::Unary(Term::IntConst("1".to_string())),
+            Expression::Unary(Term::IntConst("2".to_string())),
+            Expression::Unary(Term::Var("a".to_string())),
+            Expression::Unary(Term::Var("b".to_string())),
+        ];
+
+        assert_eq!(ast, list);
+
+        Ok(())
+    }
 }
