@@ -46,12 +46,6 @@ pub struct ParameterDec {
     pub name: String,
 }
 
-impl ParameterDec {
-    pub fn new(typ: Type, name: String) -> Self {
-        Self { typ, name }
-    }
-}
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct SubroutineBody {
     pub vars: Option<VarDec>,
