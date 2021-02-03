@@ -445,41 +445,44 @@ mod tests {
     #[test]
     fn test_if_stmt() -> Result<()> {
         let input = r#"if (false) {
-    let s = "string constant";
+        let s = "string constant";
     }
     else {
-        let i = i * j;
+        let i = i * (-j);
     }"#;
 
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let ast = parser.parse_if_stmt()?;
 
-        let true_stmts = vec![
-            Statement::LetStatement {
+        let true_stmts = vec![Statement::LetStatement {
             name: "s".to_string(),
             index: None,
-            value: Expression::Unary(Term::StringConst("string cosstant".to_string())),
-            }
-        ];
+            value: Expression::Unary(Term::StringConst("string constant".to_string())),
+        }];
 
-        let false_stmts = vec![
-            Statement::LetStatement {
-                name: "i".to_string(),
-                index: None,
-                value: Expression::Binary {
-                    left: Term::Var("i".to_string()),
-                    op: Operator::Aster,
-                    right: Box::new(Expression::Unary(Term::Var("j".to_string())))
-                }
-            }
-        ];
+        let false_stmts = vec![Statement::LetStatement {
+            name: "i".to_string(),
+            index: None,
+            value: Expression::Binary {
+                left: Term::Var("i".to_string()),
+                op: Operator::Aster,
+                right: Box::new(Expression::Unary(Term::Expr(Box::new(Expression::Unary(
+                    Term::Unary {
+                        op: UnaryOp::Minus,
+                        term: Box::new(Term::Var("j".to_string())),
+                    },
+                ))))),
+            },
+        }];
 
         let stmt = Statement::IfStatement {
-            condition: Expression::Unary(Term::True),
+            condition: Expression::Unary(Term::False),
             true_stmts: Box::new(true_stmts),
             false_stmts: Some(Box::new(false_stmts)),
         };
+
+        assert_eq!(stmt, ast);
 
         Ok(())
     }
