@@ -260,6 +260,77 @@ impl<'a> Parser<'a> {
         Ok(term)
     }
 
+    fn parse_subroutine_call(&mut self) -> Result<SubroutineCall> {
+        let name = match self.cur_token {
+            Token::Ident(ref name) => name.to_owned(),
+            _ => {
+                return Err(anyhow!(
+                    "unexpected token {:?} in parse_subroutine_call",
+                    self.cur_token
+                ))
+            }
+        };
+
+        self.next_token();
+
+        let sub = if self.symbol_is("(").is_ok() {
+            self.symbol_is("(")?;
+            self.next_token();
+
+            let expr_list = match self.symbol_is(")") {
+                Ok(()) => None,
+                Err(_) => {
+                    let list = self.parse_expr_list()?;
+                    Some(list)
+                }
+            };
+
+            self.symbol_is(")")?;
+            self.next_token();
+
+            SubroutineCall::FuncCall {
+                sub_name: name,
+                expr_list,
+            }
+        } else {
+            self.symbol_is(".")?;
+            self.next_token();
+
+            let sub_name = match self.cur_token {
+                Token::Ident(ref name) => name.to_owned(),
+                _ => {
+                    return Err(anyhow!(
+                        "unexpected token {:?} in parse_subroutine_call",
+                        self.cur_token
+                    ))
+                }
+            };
+            self.next_token();
+
+            self.symbol_is("(")?;
+            self.next_token();
+
+            let expr_list = match self.symbol_is(")") {
+                Ok(()) => None,
+                Err(_) => {
+                    let list = self.parse_expr_list()?;
+                    Some(list)
+                }
+            };
+
+            self.symbol_is(")")?;
+            self.next_token();
+
+            SubroutineCall::MethodCall {
+                name,
+                sub_name,
+                expr_list,
+            }
+        };
+
+        Ok(sub)
+    }
+
     fn parse_expr_list(&mut self) -> Result<Vec<Expression>> {
         let mut list = vec![];
         let expr = self.parse_expr()?;
