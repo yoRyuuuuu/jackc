@@ -686,4 +686,24 @@ let a = 10;"#;
 
         Ok(())
     }
+
+    #[test]
+    fn test_parse_subroutine_call() -> Result<()> {
+        let input = r#"game.run()"#;
+
+        let lexer = Lexer::new(input);
+        let mut parser = Parser::new(lexer);
+        let ast = parser.parse_subroutine_call()?;
+
+        assert_eq!(
+            SubroutineCall::MethodCall {
+                name: "game".to_string(),
+                sub_name: "run".to_string(),
+                expr_list: None,
+            },
+            ast
+        );
+
+        Ok(())
+    }
 }
