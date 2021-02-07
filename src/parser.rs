@@ -24,6 +24,52 @@ impl<'a> Parser<'a> {
         self.cur_token = self.lexer.next_token();
     }
 
+    fn parse_parameter_list(&mut self) -> Result<Option<Vec<ParameterDec>>> {
+        let mut list = vec![];
+
+        let typ = match self.cur_token.clone() {
+            Token::Int => Type::Int,
+            Token::Char => Type::Char,
+            Token::Boolean => Type::Boolean,
+            Token::Ident(name) => Type::Class(name),
+            _ => return Ok(None),
+        };
+        self.next_token();
+
+        let name = match self.cur_token.clone() {
+            Token::Ident(name) => name,
+            _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
+        };
+        self.next_token();
+
+        let parameter = ParameterDec { typ, name };
+        list.push(parameter);
+
+        while self.symbol_is(",").is_ok() {
+            self.next_token();
+
+            let typ = match self.cur_token.clone() {
+                Token::Int => Type::Int,
+                Token::Char => Type::Char,
+                Token::Boolean => Type::Boolean,
+                Token::Ident(name) => Type::Class(name),
+                _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
+            };
+            self.next_token();
+
+            let name = match self.cur_token.clone() {
+                Token::Ident(name) => name,
+                _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
+            };
+            self.next_token();
+
+            let parameter = ParameterDec { typ, name };
+            list.push(parameter);
+        }
+
+        Ok(Some(list))
+    }
+
     fn parse_statements(&mut self) -> Result<Vec<Statement>> {
         let mut stmts = vec![];
 
