@@ -24,6 +24,41 @@ impl<'a> Parser<'a> {
         self.cur_token = self.lexer.next_token();
     }
 
+    fn parser_subroutine(&mut self) -> Result<SubroutineDec> {
+        let sub_typ = match self.cur_token {
+            Token::Constructor => SubroutineType::Constructor,
+            Token::Function => SubroutineType::Function,
+            Token::Method => SubroutineType::Method,
+            _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
+        };
+
+        self.next_token();
+
+        let ret_typ = match self.cur_token.clone() {
+            Token::Void => Type::Void,
+            Token::Int => Type::Int,
+            Token::Char => Type::Char,
+            Token::Boolean => Type::Boolean,
+            Token::Ident(name) => Type::Class(name),
+            _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
+        };
+
+        self.next_token();
+
+        let name = match self.cur_token.clone() {
+            Token::Ident(name) => name,
+            _ => return Err(anyhow!("unexpected token {:?}", self.cur_token)),
+        };
+
+        self.symbol_is("(")?;
+        self.next_token();
+
+        self.symbol_is(")")?;
+        self.next_token();
+
+        unimplemented!();
+    }
+
     fn parse_parameter_list(&mut self) -> Result<Option<Vec<ParameterDec>>> {
         let mut list = vec![];
 
