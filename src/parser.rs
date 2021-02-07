@@ -824,9 +824,9 @@ let a = 10;"#;
         assert_eq!(
             Statement::DoStatement(SubroutineCall::FuncCall {
                 sub_name: "hello".to_string(),
-                expr_list: Some(vec![
-                    Expression::Unary(Term::StringConst("KEN".to_string())),
-                ])
+                expr_list: Some(vec![Expression::Unary(Term::StringConst(
+                    "KEN".to_string()
+                )),])
             }),
             ast
         );
